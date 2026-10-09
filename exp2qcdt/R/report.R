@@ -155,7 +155,7 @@ generate_rna_report <- function(qc_result,
     bg(part = "header", bg = "#EFEFEF") %>%
     # 动态上色：如果整体质量是 No，标红
     color(i = 2, j = "是否通过", color = ifelse(quality_str == "No", "#B80D0D", "black")) %>%
-    color(i = 2, j = "信噪比", color = ifelse(snr_val < 10, "#B80D0D", "black"))
+    color(i = 2, j = "信噪比", color = ifelse(snr_val < 10, "#B80D0D", "black"))  %>%
     color(i = 2, j = "Pearson相关系数", color = ifelse(rc_val < 0.80, "#B80D0D", "black"))
 
 
