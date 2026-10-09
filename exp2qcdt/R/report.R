@@ -119,13 +119,13 @@ generate_rna_report <- function(qc_result,
   }
   
   rc_str <- sprintf("%.2f", rc_val)
-  # if (!is.na(rc_val) && rc_val < 0.80) {
-  #   rc_str <- paste0(rc_str, " ↓")
-  # }
+  if (!is.na(rc_val) && rc_val < 0.80) {
+    rc_str <- paste0(rc_str, " ↓")
+  }
   
   # 整体质量判断
-  # is_pass <- (!is.na(snr_val) && snr_val >= 10) && (!is.na(rc_val) && rc_val >= 0.80)
-  is_pass <- (!is.na(snr_val) && snr_val >= 10)
+  is_pass <- (!is.na(snr_val) && snr_val >= 10) && (!is.na(rc_val) && rc_val >= 0.80)
+  # is_pass <- (!is.na(snr_val) && snr_val >= 10)
   quality_str <- ifelse(is_pass, "Yes", "No")
   
   # 3. 手动构建符合 DOCX 格式的新数据框
@@ -156,11 +156,8 @@ generate_rna_report <- function(qc_result,
     # 动态上色：如果整体质量是 No，标红
     color(i = 2, j = "是否通过", color = ifelse(quality_str == "No", "#B80D0D", "black")) %>%
     color(i = 2, j = "信噪比", color = ifelse(snr_val < 10, "#B80D0D", "black"))
-    # 动态上色：如果数值未达标，也标红 (可选)
-    # color(i = 2, j = "Pearson相关系数", color = ifelse(rc_val < 0.80, "#B80D0D", "black"))
-  
-  # 如果 SNR 也要标红，可以取消下面这行的注释
-  # color(i = 2, j = "信噪比", color = ifelse(snr_val < 10, "#B80D0D", "black"))
+    color(i = 2, j = "Pearson相关系数", color = ifelse(rc_val < 0.80, "#B80D0D", "black"))
+
 
 
   # --- 3. 生成中文报告流程 ---
