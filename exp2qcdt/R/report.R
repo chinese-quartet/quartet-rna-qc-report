@@ -57,20 +57,20 @@ generate_rna_report <- function(qc_result,
   if (is.null(qc_result) || is.null(report_template)) {
     stop("All arguments (qc_result, report_template) are required.")
   }
-
+  
   if (is.null(report_dir)) {
     path <- getwd()
     sub_dir <- "output"
     dir.create(file.path(path, sub_dir), showWarnings = FALSE)
     report_dir <- file.path(path, "output")
   }
-
+  
   ### 读取quarter报告模板并生成报告
   if (is.null(report_name)) {
     report_name <- "Quartet_RNA_report.docx"
   }
   output_file <- file.path(report_dir, report_name)
-
+  
   # --- 1. 定义中文文本内容 (基于 ShenKang-Quartet-RNA-Report_v0.1.docx) ---
   
   # 摘要
@@ -95,7 +95,7 @@ generate_rna_report <- function(qc_result,
   # 免责声明
   text_disclaimer_title <- "免责声明"
   text_disclaimer_content <- "本数据质量报告仅针对所评估的特定数据集提供分析结果，仅供信息参考之用。尽管已尽最大努力确保分析结果的准确性和可靠性，但本报告按“现状（AS IS）”提供，不附带任何形式的明示或暗示担保。报告作者及发布方不对基于本报告内容所采取的任何行动承担责任。本报告中的结论不应被视为对任何产品或流程质量的最终判定，也不应用于关键应用场景、商业决策或法规合规用途，除非经过专业核查和独立验证。对于分析结果的正确性、准确性、可靠性或适用性，不作任何明示或暗示的保证。"
-
+  
   # --- 创建符合新格式的表格 ---
   # 1. 从原始 qc_metrics_table 中提取数据
   # 使用 grepl 模糊匹配，防止因为空格或大小写导致取不到值
@@ -119,13 +119,13 @@ generate_rna_report <- function(qc_result,
   }
   
   rc_str <- sprintf("%.2f", rc_val)
-  # if (!is.na(rc_val) && rc_val < 0.80) {
-  #   rc_str <- paste0(rc_str, " ↓")
-  # }
+  if (!is.na(rc_val) && rc_val < 0.80) {
+    rc_str <- paste0(rc_str, " ↓")
+  }
   
   # 整体质量判断
-  # is_pass <- (!is.na(snr_val) && snr_val >= 10) && (!is.na(rc_val) && rc_val >= 0.80)
-  is_pass <- (!is.na(snr_val) && snr_val >= 10)
+  is_pass <- (!is.na(snr_val) && snr_val >= 10) && (!is.na(rc_val) && rc_val >= 0.80)
+  # is_pass <- (!is.na(snr_val) && snr_val >= 10)
   quality_str <- ifelse(is_pass, "Yes", "No")
   
   # 3. 手动构建符合 DOCX 格式的新数据框
@@ -155,14 +155,11 @@ generate_rna_report <- function(qc_result,
     bg(part = "header", bg = "#EFEFEF") %>%
     # 动态上色：如果整体质量是 No，标红
     color(i = 2, j = "是否通过", color = ifelse(quality_str == "No", "#B80D0D", "black")) %>%
-    color(i = 2, j = "信噪比", color = ifelse(snr_val < 10, "#B80D0D", "black"))
-    # 动态上色：如果数值未达标，也标红 (可选)
-    # color(i = 2, j = "Pearson相关系数", color = ifelse(rc_val < 0.80, "#B80D0D", "black"))
+    color(i = 2, j = "信噪比", color = ifelse(snr_val < 10, "#B80D0D", "black")) %>%
+    color(i = 2, j = "Pearson相关系数", color = ifelse(rc_val < 0.80, "#B80D0D", "black"))
   
-  # 如果 SNR 也要标红，可以取消下面这行的注释
-  # color(i = 2, j = "信噪比", color = ifelse(snr_val < 10, "#B80D0D", "black"))
-
-
+  
+  
   # --- 3. 生成中文报告流程 ---
   
   read_docx(report_template) %>%
@@ -216,7 +213,7 @@ generate_rna_report <- function(qc_result,
     body_add_break() %>%
     body_add_par(value = "Pearson Correlation Coefficient", style = "heading 2") %>%
     body_add_gg(value = qc_result$logfc_plot, style = "centered") %>% # [cite: 9]
-
+    
     # 输出文件
     print(target = output_file)
 }
